@@ -1,7 +1,9 @@
 class Paciente:
     def __init__(self, nome, cpf, rg, idade, convenio=None):
         self.nome = nome
-        self.cpf
+        self.cpf = cpf
+        self.rg = rg
+        self.idade = idade
         
         
         self.convenio = convenio
