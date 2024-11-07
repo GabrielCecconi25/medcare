@@ -1,5 +1,3 @@
-
-
 class AtendimentoVazio(Exception):
     pass
 
