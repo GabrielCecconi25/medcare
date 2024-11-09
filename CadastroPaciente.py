@@ -1,4 +1,4 @@
-import Paciente
+from Paciente import Paciente, Convenio
 
 class CadastroSenha:
     def main():
@@ -22,7 +22,8 @@ class CadastroSenha:
             idade = input('Idade do paciente: ')
 
             paciente = Paciente(nome, cpf, rg, idade, convenio)
-
+            print(paciente)
+            print(convenio)
 
             # Cadastrar usuário
             # Pega os dados do paciente
@@ -32,6 +33,10 @@ class CadastroSenha:
             # Pega os dados do paciente
         
         # Cria uma senha para o paciente
+        senha = Senha(paciente)
+
+        print (f'Senha do Paciente: {senha.numero}')
+
         # Aloca o Paciente a senha
 
         # Criar numero da senha
@@ -44,11 +49,10 @@ class CadastroSenha:
         #Script puxar dados do paciente
         convenio = Convenio(empresa, numero, plano)
         paciente = Paciente(nome, cpf, rg, idade, convenio)
-
     
-    def verifyCPF(cpf):
-        status = VerificarCPFBANCO()
-        return status
+def verifyCPF(cpf):
+    status = False
+    return status
 
     
 
