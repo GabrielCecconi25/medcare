@@ -1,12 +1,13 @@
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, declarative_base
 
 # Definição do Base, necessário para criar as tabelas
 Base = declarative_base()
 
+
 class Convenio(Base):
-    __tablename__ = 'convenios'
+    __tablename__ = 'convenio'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     empresa = Column(String)
@@ -23,14 +24,15 @@ class Convenio(Base):
 
 
 class Paciente(Base):
-    __tablename__ = 'pacientes'
+    __tablename__ = 'paciente'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     nome = Column(String)
     cpf = Column(String, unique=True)  # Usando String para CPF
     rg = Column(String, unique=True)   # Usando String para RG
     idade = Column(Integer)
-    convenio_id = Column(Integer, ForeignKey('convenios.id'))  # Relacionamento com 'convenios'
+    # Relacionamento com 'convenios'
+    convenio_id = Column(Integer, ForeignKey('convenio.id'))
     convenio = relationship('Convenio', backref='pacientes')
 
     def __repr__(self):

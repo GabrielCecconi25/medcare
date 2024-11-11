@@ -11,4 +11,4 @@ class BancoScript:
         return session
 
     def Select:
-        session = connection()
+    session = connection()
