@@ -70,21 +70,7 @@ class CadastroSenha:
 
         session.close()
 
-    def criar_senha(self, session):
-        # Recuperar o último número de senha gerado
-        ultimo_senha = session.execute('SELECT numero FROM senha ORDER BY numero DESC LIMIT 1').fetchone()
-
-        if ultimo_senha:
-            # Incrementa o número da última senha
-            numero_senha = ultimo_senha.numero[0] + 1
-        else:
-            numero_senha = 1  # Primeira senha a ser gerada
-
-        # Criar e adicionar a nova senha diretamente na tabela
-        session.execute(f"INSERT INTO senha (status, numero) VALUES ('em espera', {numero_senha})")
-        session.commit()
-
-        return numero_senha
+    
 
         # Aloca o Paciente a senha, falta isso
 

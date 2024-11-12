@@ -16,25 +16,29 @@ class Senha(Base):
     convenio = relationship('Paciente', backref='pacientes')
 
     def __init__(self, paciente):
-
-
         self.paciente = paciente
         setNumero()
-    
+
     def setNumero(self):
         # Logica para gerar uma senha
         # que não esteja registrada no banco
         self.numero = numero
 
 
-class Convenio(Base):
-   
+def criar_senha(self, session):
+    # Recuperar o último número de senha gerado
+    ultimo_senha = session.execute(
+        'SELECT numero FROM senha ORDER BY numero DESC LIMIT 1').fetchone()
 
-    def __repr__(self):
-        return f'<Convenio(empresa={self.empresa}, numero={self.numero}, plano={self.plano})>'
+    if ultimo_senha:
+        # Incrementa o número da última senha
+        numero_senha = ultimo_senha.numero[0] + 1
+    else:
+        numero_senha = 1  # Primeira senha a ser gerada
 
-    def __init__(self, empresa, numero, plano):
-        self.empresa = empresa
-        self.numero = numero
-        self.plano = plano
+    # Criar e adicionar a nova senha diretamente na tabela
+    session.execute(
+        f"INSERT INTO senha (status, numero) VALUES ('em espera', {numero_senha})")
+    session.commit()
 
+    return numero_senha
