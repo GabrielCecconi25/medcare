@@ -1,44 +1,38 @@
+from datetime import datetime
+
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy.orm import relationship
 
-
-# Definição do Base, necessário para criar as tabelas
-Base = declarative_base()
-
+from Banco import Base, get_session
+from Paciente import Paciente
 
 class Senha(Base):
     __tablename__ = 'senha'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    status = Column(String)
     numero = Column(Integer)
+    horario = Column(String)
     paciente_id = Column(Integer, ForeignKey('paciente.id'))
-    convenio = relationship('Paciente', backref='pacientes')
 
-    def __init__(self, paciente):
+    paciente = relationship("Paciente", back_populates="senhas")
+
+    
+    def __init__(self, paciente, session):
         self.paciente = paciente
-        setNumero()
+        self.status = "em espera"
+        self.setNumero(session)
 
-    def setNumero(self):
-        # Logica para gerar uma senha
-        # que não esteja registrada no banco
-        self.numero = numero
+    def setNumero(self, session):
+        session.flush()
 
+        # Recuperar o último número de senha gerado
+        ultima_senha = session.query(Senha).order_by(Senha.numero.desc()).first()
 
-def criar_senha(self, session):
-    # Recuperar o último número de senha gerado
-    ultimo_senha = session.execute(
-        'SELECT numero FROM senha ORDER BY numero DESC LIMIT 1').fetchone()
+        if ultima_senha:
+            self.numero = ultima_senha.numero + 1 # Incrementa o número da última senha
+        else:
+            self.numero = 1  # Primeira senha a ser gerada
 
-    if ultimo_senha:
-        # Incrementa o número da última senha
-        numero_senha = ultimo_senha.numero[0] + 1
-    else:
-        numero_senha = 1  # Primeira senha a ser gerada
-
-    # Criar e adicionar a nova senha diretamente na tabela
-    session.execute(
-        f"INSERT INTO senha (status, numero) VALUES ('em espera', {numero_senha})")
-    session.commit()
-
-    return numero_senha
+        # Define o horário atual da criação da senha
+        self.horario = datetime.now().strftime("%d/%m/%Y %H:%M:%S")

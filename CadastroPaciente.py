@@ -1,19 +1,19 @@
-from Paciente import Paciente, Convenio
-from Banco import sessionmaker
-from Banco import create_engine
+from Banco import get_session
+from Paciente import Paciente
+from Convenio import Convenio
+from Senha import Senha
 
 
 class CadastroSenha:
 
-    nossobanco = create_engine('sqlite:///banco/medcare.db')
-    Session = sessionmaker(bind=nossobanco)
-
     def main(self):
-        cpf = input('Informe o cpf do paciente: ')
+        cpf = int(input('Informe o cpf do paciente: '))
 
+        # Cria conexão do banco
+        engine, session = get_session()
+    
         # Verificar cpf no banco
-        status = self.verifyCPF(cpf)
-        session = self.Session()
+        status = self.verifyCPF(cpf, session)
 
         if not status:
             print('Paciente sem cadastro\nRealize o cadastro do Paciente...')
@@ -23,13 +23,13 @@ class CadastroSenha:
             numero = input('Informe o numero do convenio: ')
             plano = input('Informe o plano do convenio:')
 
-            convenio = Convenio(empresa, numero, plano)
-            session.add(convenio)
-
-            print('Cadastro de Paciente')
+            print('\nCadastro de Paciente')
             nome = input('Informe o Nome do Paciente: ')
             rg = input('Informe o RG: ')
             idade = input('Idade do paciente: ')
+
+            convenio = Convenio(empresa, numero, plano)
+            session.add(convenio)
 
             paciente = Paciente(nome, cpf, rg, idade, convenio)
             session.add(paciente)
@@ -40,49 +40,47 @@ class CadastroSenha:
 
             # Cadastrar usuário
             # Pega os dados do paciente
-
-            senha = self.criar_senha(session)
             print(f'Senha gerada para o paciente {paciente.nome}: {senha}')
 
         else:
-            # pelo que eu entendi não precisa usar o get aqui o First faz a busca com o cpf que nós fornecemos e retorna os dados
             paciente = session.query(Paciente).filter_by(cpf=cpf).first()
 
-            if paciente:
-                # Exibe os dados do paciente
-                print(f"Dados do paciente encontrado:")
-                print(f"Nome: {paciente.nome}")
-                print(f"CPF: {paciente.cpf}")
-                print(f"RG: {paciente.rg}")
-                print(f"Idade: {paciente.idade}")
+        if paciente:
+            # Exibe os dados do paciente
+            print(f"Dados do paciente encontrado:")
+            print(f"Nome: {paciente.nome}")
+            print(f"CPF: {paciente.cpf}")
+            print(f"RG: {paciente.rg}")
+            print(f"Idade: {paciente.idade}")
 
-                # Perguntar se deseja gerar uma senha
-                gerar_senha = input( 'Deseja gerar uma senha para o paciente? (s/n): ').strip().lower()
+            # Perguntar se deseja gerar uma senha
+            gerar_senha = None
+            while gerar_senha != 'n' and gerar_senha != 's':
+                gerar_senha = input('Deseja gerar uma senha para o paciente? (s/n): ').strip().lower()
 
-                if gerar_senha == 's':
-                    # Criar uma nova senha para o paciente
-                    senha = self.criar_senha(session)
-                    print(f'Senha gerada para o Paciente {paciente.nome}: {senha}')
-                else:
-                    print(f"Senha não gerada para o Paciente {paciente.nome}.")
+            if gerar_senha == 's':
+                # Criar uma nova senha para o paciente
+                senha = Senha(paciente, session)
+                session.add(senha)
+                session.commit()
+
+                todas_senhas = session.query(Senha).all()
+                for senha in todas_senhas:
+                    print(f"ID: {senha.id}, Número: {senha.numero}, Status: {senha.status}, Horário: {senha.horario}, Paciente ID: {senha.paciente_id}")
+                print(f'Senha gerada para o Paciente {paciente.nome}: {senha.numero}')
             else:
-                print("Paciente não encontrado no banco.")
-
-        session.close()
-
-    
-
-        # Aloca o Paciente a senha, falta isso
-
-        # Criar numero da senha, foi feito
+                print(f"Senha não gerada para o Paciente {paciente.nome}.")
 
         # Joga a senha na fila (ultimo) (Adicionar ao Banco), foi feito mas vamos verificar
 
-    def verifyCPF(self, cpf):
-        session = self.Session()  # Cria uma nova sessão
+        #Fecha conexão com o banco
+        session.close()
+
+    def verifyCPF(self, cpf, session):
         existe = session.query(Paciente).filter_by(cpf=cpf).first() is not None
-        session.close()  # Fecha a sessão para liberar recursos
-        print(existe)
 
         return existe
         
+
+
+123456
