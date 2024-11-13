@@ -21,15 +21,16 @@ class Senha(Base):
     def __init__(self, paciente, session):
         self.paciente = paciente
         self.status = "em espera"
+        session.add(self)
+        session.flush()
         self.setNumero(session)
 
     def setNumero(self, session):
-        session.flush()
-
         # Recuperar o último número de senha gerado
         ultima_senha = session.query(Senha).order_by(Senha.numero.desc()).first()
+        print(ultima_senha.numero)
 
-        if ultima_senha:
+        if ultima_senha.numero:
             self.numero = ultima_senha.numero + 1 # Incrementa o número da última senha
         else:
             self.numero = 1  # Primeira senha a ser gerada

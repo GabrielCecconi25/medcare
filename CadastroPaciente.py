@@ -34,13 +34,10 @@ class CadastroSenha:
             paciente = Paciente(nome, cpf, rg, idade, convenio)
             session.add(paciente)
 
+
             session.commit()  # Salva as alterações no banco
             print(f'paciete {paciente.nome} foi cadastrado!!')
             print(f'Convenio {convenio.empresa} {convenio.plano} cadastrado com sucesso!')
-
-            # Cadastrar usuário
-            # Pega os dados do paciente
-            print(f'Senha gerada para o paciente {paciente.nome}: {senha}')
 
         else:
             paciente = session.query(Paciente).filter_by(cpf=cpf).first()
@@ -61,12 +58,9 @@ class CadastroSenha:
             if gerar_senha == 's':
                 # Criar uma nova senha para o paciente
                 senha = Senha(paciente, session)
-                session.add(senha)
+                
                 session.commit()
 
-                todas_senhas = session.query(Senha).all()
-                for senha in todas_senhas:
-                    print(f"ID: {senha.id}, Número: {senha.numero}, Status: {senha.status}, Horário: {senha.horario}, Paciente ID: {senha.paciente_id}")
                 print(f'Senha gerada para o Paciente {paciente.nome}: {senha.numero}')
             else:
                 print(f"Senha não gerada para o Paciente {paciente.nome}.")
@@ -78,9 +72,8 @@ class CadastroSenha:
 
     def verifyCPF(self, cpf, session):
         existe = session.query(Paciente).filter_by(cpf=cpf).first() is not None
-
         return existe
         
 
 
-123456
+#123456
