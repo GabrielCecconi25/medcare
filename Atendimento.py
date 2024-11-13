@@ -1,25 +1,32 @@
-class AtendimentoVazio(Exception):
-    pass
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
 
-class Atendimento:
-    def __init__(self):
-        self.__senhas = []
-        self.__fim = 0
+from Banco import Base
+from Consultorio import Consultorio
+from Medico import Medico
+from Paciente import Paciente
 
-    def vazia(self):
-        return self.__fim == 0
-    
-    def enfileira(self, senha):
-        self.__senhas[self.__fim] = senha
-        self.__fim += 1
-    
-    def desenfileira(self):
-        if self.vazia():
-            raise AtendimentoVazio('Fila do Atendimento vazia.')
-        senha = self.__senhas[0]
-        for i in range(1, self.__fim):
-            self.__senhas[i-1] = self.__senhas[i]
-        self.__fim -= 1
-        return senha
+class Atendimento(Base):
+    __tablename__ = 'atendimento'
 
-    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    status = Column(String)
+    horario_inicio = Column(String)
+    horario_termino = Column(String)
+    paciente_id = Column(Integer, ForeignKey('paciente.id'))
+    medico_id = Column(Integer, ForeignKey('medico.id'))
+    consultorio_id = Column(Integer, ForeignKey('consultorio.id'))
+
+    paciente = relationship("Paciente", back_populates="atendimento")
+    medico = relationship("Medico", back_populates="atendimento")
+    consultorio = relationship("Consultorio", back_populates="atendimento")
+
+
+    def __init__(self, paciente, medico, consultorio):
+        self.status = "em andamento"
+        self.paciente = paciente
+        self.medico = medico
+        self.consultorio = consultorio
+
+    def encerrarAtendimento(self):
+        self.status = "encerrado"

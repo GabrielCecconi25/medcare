@@ -21,5 +21,4 @@ def main():
         sen = CadastroSenha()
         sen.main()
 
-
 main()

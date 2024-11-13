@@ -9,15 +9,15 @@ class Consultorio(Base):
     numero = Column(Integer)
     status = Column(String)
 
-    def __init__(self, numero, status=Livre):
+    def __init__(self, numero, status="Desocupada"):
         self.numero = numero
         self.__status = status
 
     def ocuparSala(self, medico, senha):
-        self.__status = ocupada
-        gerenciarSala(self.numero, medico, senha)
+        self.__status = "Ocupada"
+        # gerenciarSala(self.numero, medico, senha)
     
     def desocuparSala(self):
-        self.__status = desocupada
+        self.__status = "Desocupada"
     
 

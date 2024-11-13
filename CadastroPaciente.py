@@ -1,7 +1,10 @@
+from time import sleep
+
 from Banco import get_session
 from Paciente import Paciente
 from Convenio import Convenio
 from Senha import Senha
+from Fila import Fila
 
 
 class CadastroSenha:
@@ -16,7 +19,7 @@ class CadastroSenha:
         status = self.verifyCPF(cpf, session)
 
         if not status:
-            print('Paciente sem cadastro\nRealize o cadastro do Paciente...')
+            print('\nPaciente sem cadastro\nRealize o cadastro do Paciente...')
 
             print('\nCadastro de Convenio')
             empresa = input('Informe a empresa: ')
@@ -36,7 +39,9 @@ class CadastroSenha:
 
 
             session.commit()  # Salva as alterações no banco
-            print(f'paciete {paciente.nome} foi cadastrado!!')
+
+            sleep(2)
+            print(f'\nPaciete {paciente.nome} foi cadastrado!!')
             print(f'Convenio {convenio.empresa} {convenio.plano} cadastrado com sucesso!')
 
         else:
@@ -44,6 +49,7 @@ class CadastroSenha:
 
         if paciente:
             # Exibe os dados do paciente
+            sleep(2)
             print(f"Dados do paciente encontrado:")
             print(f"Nome: {paciente.nome}")
             print(f"CPF: {paciente.cpf}")
@@ -66,6 +72,8 @@ class CadastroSenha:
                 print(f"Senha não gerada para o Paciente {paciente.nome}.")
 
         # Joga a senha na fila (ultimo) (Adicionar ao Banco), foi feito mas vamos verificar
+        fila = Fila()
+        fila.enfileira(senha.numero)
 
         #Fecha conexão com o banco
         session.close()

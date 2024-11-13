@@ -15,7 +15,7 @@ class Senha(Base):
     horario = Column(String)
     paciente_id = Column(Integer, ForeignKey('paciente.id'))
 
-    paciente = relationship("Paciente", back_populates="senhas")
+    paciente = relationship("Paciente", back_populates="senha")
 
     
     def __init__(self, paciente, session):
@@ -28,7 +28,6 @@ class Senha(Base):
     def setNumero(self, session):
         # Recuperar o último número de senha gerado
         ultima_senha = session.query(Senha).order_by(Senha.numero.desc()).first()
-        print(ultima_senha.numero)
 
         if ultima_senha.numero:
             self.numero = ultima_senha.numero + 1 # Incrementa o número da última senha
