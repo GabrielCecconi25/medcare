@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 
-from Banco import Base, get_session
+from Banco import Base
 from Paciente import Paciente
 
 class Senha(Base):

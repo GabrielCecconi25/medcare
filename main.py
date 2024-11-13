@@ -5,6 +5,8 @@ from CadastroPaciente import CadastroSenha
 from Convenio import Convenio
 from Paciente import Paciente
 from Senha import Senha
+from Medico import Medico
+from Consultorio import Consultorio
 
 
 def main():

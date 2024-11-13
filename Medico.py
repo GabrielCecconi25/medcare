@@ -1,24 +1,19 @@
+from sqlalchemy import Column, Integer, String
 
-class Medico :
+from Banco import Base
+
+class Medico(Base):
+    __tablename__ = 'medico'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nome = Column(String)
+    crm = Column(Integer, unique=True)
+    especialidade = Column(String)
+
+    def __repr__(self):
+        return f'<Medico(nome={self.nome}, crm={self.crm}, especialidade={self.especialidade})>'
+
     def __init__(self, crm, nome, especialidade):
-        self.__crm = crm
-        self.__nome = nome
-        self.__especialidade = especialidade
-    
-    def get_crm(self):
-        return self.__crm
-
-    def set_crm(self, crm):
-        self.__crm = crm
-    
-    def get_nome(self):
-        return self.__nome
-    
-    def set_nome(self, nome):
-        self.__nome = nome
-    
-    def get_especialidade(self):
-        return self.__especialidade
-
-    def set_especialidade(self, especialidade):
-        self.__especialidade = especialidade
+        self.crm = crm
+        self.nome = nome
+        self.especialidade = especialidade

@@ -1,4 +1,14 @@
-class Consultorio:
+from sqlalchemy import Column, Integer, String
+
+from Banco import Base
+
+class Consultorio(Base):
+    __tablename__ = 'consultorio'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    numero = Column(Integer)
+    status = Column(String)
+
     def __init__(self, numero, status=Livre):
         self.numero = numero
         self.__status = status
@@ -7,7 +17,7 @@ class Consultorio:
         self.__status = ocupada
         gerenciarSala(self.numero, medico, senha)
     
-    def desocuparSala(self)
+    def desocuparSala(self):
         self.__status = desocupada
     
 
