@@ -11,11 +11,9 @@ from Fila import Fila, FilaVazia
 def main():
     # Cria banco de dados SQLite
     criar_banco()
-    engine, session = get_session()
 
+    # Iniciar Fila
     fila = Fila()
-    fila.iniciar(session)
-    session.close()
 
     while True:
         print("Menu:")
@@ -141,6 +139,7 @@ def main():
                     print("Criando nova senha...")
                     sen = fila.criarSenha(paciente, session)
                     fila.enfileira(sen)
+                    print(F"Senha gerada: {sen}")
                 else:
                     print("Paciente não encontrado.")
             
@@ -155,9 +154,11 @@ def main():
                         atendimento = Atendimento(paciente, medico, consultorio)
 
                         consultorio.status = "Ocupado"
+                        senha.status = "Em atendimento"
 
                         session.add(atendimento)
-                        session.commit()      
+                        session.commit()
+                        print(f"Atendimento gerado para Paciente {paciente.nome} no Consultório {consultorio.numero}")
                     else:
                         print('Todos os consultorios estão ocupados no momento, aguarde mais um tempo!')
                 except FilaVazia as e:
@@ -171,6 +172,8 @@ def main():
                 if atendimento:
                     consultorio = session.query(Consultorio).filter_by(id=atendimento.consultorio_id).first()
                     consultorio.status = "Desocupado"
+                    paciente = atendimento.paciente
+                    paciente.senha.status = "Finalizado"
 
                     descricao = input("Informe uma descrição a consulta: ")
                     receita = input("Informe a receita/NA: ")
@@ -189,7 +192,7 @@ def main():
                     if atendimentos:
                         print("Atendimentos disponíveis para o paciente:")
                         for i, atd in enumerate(atendimentos):
-                            print(f"{i + 1}. Atendimento ID: {atd.id}, Data: {atd.data}, Descrição: {atd.descricao[:30]}...")
+                            print(f"{i + 1}. Atendimento ID: {atd.id}, Data: {atd.horario_inicio}, Descrição: {atd.descricao[:30]}...")
                         
                         op = int(input("Informe o número do atendimento que deseja acessar: ")) - 1
                         while op < 0 or op >= len(atendimentos):
@@ -242,7 +245,7 @@ def main():
                 numero = int(input("Informe o número do consultório: "))
                 consultorio = session.query(Consultorio).filter_by(numero=numero).first()
                 if consultorio:
-                    print(f"Número: {consultorio.numero}, Localização: {consultorio.status}")
+                    print(f"Número: {consultorio.numero}, Stautus: {consultorio.status}")
                 else:
                     print("Consultório não encontrado.")
 
