@@ -129,14 +129,22 @@ def main():
             session.close()
 
         elif cod == 3:  # Fila de Atendimento
+            atd = int(input("1. Cadastrar Senha\n2. Gerar novo atendimento\n"))
             engine, session = get_session()
 
-            cpf = int(input('Informe o cpf do paciente: '))
-            paciente = session.query(Paciente).filter_by(cpf=cpf).first()
-            print("Criando nova senha...")
-            if paciente:
-                sen = fila.criarSenha(paciente, session)
-                fila.enfileira(sen)
+            if atd == 1:
+                cpf = int(input('Informe o cpf do paciente: '))
+                paciente = session.query(Paciente).filter_by(cpf=cpf).first()
+                print("Criando nova senha...")
+                if paciente:
+                    sen = fila.criarSenha(paciente, session)
+                    fila.enfileira(sen)
+            
+            elif atd == 2:
+                senha = fila.desenfileira()
+                paciente = senha.paciente
+
+            session.close()
 
         elif cod == 4:  # Operações com Consultório
             cons = int(input("1. Cadastrar Consultório\n2. Alterar Dados do Consultório\n3. Pegar Dados do Consultório\n4. Deletar Consultório\n"))
