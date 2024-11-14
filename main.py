@@ -1,6 +1,5 @@
 from Banco import criar_banco, get_session
 from Atendimento import Atendimento
-from CadastroPaciente import CadastroSenha
 from Convenio import Convenio
 from Paciente import Paciente
 from Senha import Senha
@@ -12,8 +11,11 @@ from Fila import Fila, FilaVazia
 def main():
     # Cria banco de dados SQLite
     criar_banco()
+    engine, session = get_session()
 
     fila = Fila()
+    fila.iniciar(session)
+    session.close()
 
     while True:
         print("Menu:")
@@ -129,46 +131,88 @@ def main():
             session.close()
 
         elif cod == 3:  # Fila de Atendimento
-            atd = int(input("1. Cadastrar Senha\n2. Gerar novo atendimento\n3. Finalizar Atendimento\n"))
+            atd = int(input("1. Cadastrar Senha\n2. Gerar novo atendimento\n3. Finalizar Atendimento\n4. Pesquisar Atendimento por Paciente\n"))
             engine, session = get_session()
 
             if atd == 1:
                 cpf = int(input('Informe o cpf do paciente: '))
                 paciente = session.query(Paciente).filter_by(cpf=cpf).first()
-                print("Criando nova senha...")
                 if paciente:
+                    print("Criando nova senha...")
                     sen = fila.criarSenha(paciente, session)
                     fila.enfileira(sen)
+                else:
+                    print("Paciente não encontrado.")
             
             elif atd == 2:
                 try:
-                    senha = fila.desenfileira()
-                    paciente = senha.paciente
-
                     consultorio = session.query(Consultorio).filter_by(status="Desocupada").first()
                     if consultorio:
+                        senha = fila.desenfileira()
+                        paciente = senha.paciente
+
                         medico = session.query(Medico).filter_by(id=consultorio.medico_id).first()
                         atendimento = Atendimento(paciente, medico, consultorio)
 
+                        consultorio.status = "Ocupado"
+
                         session.add(atendimento)
-                        session.commit()                     
+                        session.commit()      
                     else:
                         print('Todos os consultorios estão ocupados no momento, aguarde mais um tempo!')
                 except FilaVazia as e:
                     print(e)
             
             elif atd == 3:
-                crm = int(input('Informe o crm do Médico em Atendimento: '))
-                atendimento = session.query(Consultorio).filter_by(status="em andamento", crm=crm).first()
+                crm = int(input('Informe o CRM do Médico em Atendimento: '))
+                medico = session.query(Atendimento).filter_by(crm=crm).first()
+                atendimento = session.query(Atendimento).filter_by(status="em andamento", crm=crm).first()
 
-                descricao = input("Informe uma descrição a consulta: ")
-                receita = input("Informe a receita/NA: ")
+                if atendimento:
+                    consultorio = session.query(Consultorio).filter_by(id=atendimento.consultorio_id).first()
+                    consultorio.status = "Desocupado"
 
-                atendimento.encerrarAtendimento(descricao, receita)
+                    descricao = input("Informe uma descrição a consulta: ")
+                    receita = input("Informe a receita/NA: ")
+
+                    atendimento.encerrarAtendimento(descricao, receita)
+                else:
+                    print("Atendimento relacionado ao CRM não encontrado.")
+            
+
+            elif atd == 4:
+                cpf = int(input('Informe o cpf do Paciente: '))
+                paciente = session.query(Paciente).filter_by(cpf=cpf).first()
+
+                if paciente:
+                    atendimentos = session.query(Atendimento).filter_by(paciente_id=paciente.id).all()
+                    if atendimentos:
+                        print("Atendimentos disponíveis para o paciente:")
+                        for i, atd in enumerate(atendimentos):
+                            print(f"{i + 1}. Atendimento ID: {atd.id}, Data: {atd.data}, Descrição: {atd.descricao[:30]}...")
+                        
+                        op = int(input("Informe o número do atendimento que deseja acessar: ")) - 1
+                        while op < 0 or op >= len(atendimentos):
+                            print(f"Opção {op + 1}, inválida.")
+                            op = int(input("Informe o número do atendimento que deseja acessar: ")) - 1
+
+                        atendimento = atendimentos[op]
+                        print("\nDetalhes do Atendimento Selecionado:")
+                        print(f"Descrição: {atendimento.descricao}")
+                        print(f"Receita: {atendimento.receita}")
+                        print(f"Médico: {atendimento.medico.nome}")
+
+                    else:
+                        print("Nenhum atendimento encontrado para este paciente.")
+
+                else:
+                    print("Paciente não encontrado.")
+
+                
             session.close()
 
         elif cod == 4:  # Operações com Consultório
-            cons = int(input("1. Cadastrar Consultório\n2. Alterar Dados do Consultório\n3. Pegar Dados do Consultório\n4. Deletar Consultório\n5. Ver consultorios"))
+            cons = int(input("1. Cadastrar Consultório\n2. Alterar Dados do Consultório\n3. Pegar Dados do Consultório\n4. Deletar Consultório\n5. Ver consultorios\n"))
             engine, session = get_session()
 
             if cons == 1:
@@ -178,21 +222,16 @@ def main():
                 if consultorio_existente:
                     print("Consultório já cadastrado.")
                 else:
-                    status = input(
-                        "Informe status do consultório: ")
-                    consultorio = Consultorio(
-                        numero=numero, status=status)
+                    consultorio = Consultorio(numero=numero)
                     session.add(consultorio)
                     session.commit()
                     print("Consultório cadastrado com sucesso.")
 
             elif cons == 2:
-                numero = int(
-                    input("Informe o número do consultório a ser atualizado: "))
-                consultorio = session.query(
-                    Consultorio).filter_by(numero=numero).first()
+                numero = int(input("Informe o número do consultório a ser atualizado: "))
+                consultorio = session.query(Consultorio).filter_by(numero=numero).first()
                 if consultorio:
-                    consultorio.localizacao = input(
+                    consultorio.status = input(
                         "Informe status do consultório: ") or consultorio.status
                     session.commit()
                     print("Dados do consultório atualizados com sucesso.")
@@ -201,33 +240,34 @@ def main():
 
             elif cons == 3:
                 numero = int(input("Informe o número do consultório: "))
-                consultorio = session.query(
-                    Consultorio).filter_by(numero=numero).first()
+                consultorio = session.query(Consultorio).filter_by(numero=numero).first()
                 if consultorio:
-                    print(f"Número: {consultorio.numero}, Localização: {
-                          consultorio.localizacao}")
+                    print(f"Número: {consultorio.numero}, Localização: {consultorio.status}")
                 else:
                     print("Consultório não encontrado.")
 
             elif cons == 4:
-                numero = int(
-                    input("Informe o número do consultório a ser deletado: "))
-                consultorio = session.query(
-                    Consultorio).filter_by(numero=numero).first()
+                numero = int(input("Informe o número do consultório a ser deletado: "))
+                consultorio = session.query(Consultorio).filter_by(numero=numero).first()
                 if consultorio:
                     session.delete(consultorio)
                     session.commit()
                     print("Consultório deletado com sucesso.")
             elif cons == 5:
                 consultorios = session.query(Consultorio).all()
-                for consultorio in consultorios:
-                    print(consultorios)
+                if consultorios:
+                    for consultorio in consultorios:
+                        print(f"Consultório: {consultorio.numero}; Status: {consultorio.status}")
                 else:
                     print("Consultório não encontrado.")
             session.close()
 
         elif cod == 0:
             print("Encerrando o sistema...")
+            session.query(Senha).delete()
+
+            session.commit()
+            session.close()
             break
 
         else:

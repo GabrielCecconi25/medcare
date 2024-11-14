@@ -11,8 +11,12 @@ class Fila():
         return self.__fim == 0
     
     def enfileira(self, senha):
-        self.__senhas.append(senha)
-        self.__fim += 1
+        if self.__fim >= len(self.__senhas):
+            self.__senhas.append(senha)
+        else:
+            self.__senhas[self.__fim] = senha
+        self.__fim +=1
+
     
     def desenfileira(self):
         if self.vazia():
@@ -34,10 +38,6 @@ class Fila():
         senha = Senha(paciente, session)
         session.commit()
         return senha.numero
-            
-
-
-    
         
 class FilaVazia(Exception):
     pass

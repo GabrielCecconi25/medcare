@@ -16,15 +16,15 @@ class Consultorio(Base):
     atendimento = relationship("Atendimento", back_populates="consultorio")
 
     def __repr__(self):
-        return f'<Consultorio(numero={self.nome}, status={self.status}>'
+        return f'<Consultorio(numero={self.numero}, status={self.status}>'
 
-    def __init__(self, numero, status="Desocupada"):
+    def __init__(self, numero):
         self.numero = numero
-        self.status = status
+        self.status = "Desocupado"
 
-    def ocuparSala(self, medico, senha):
+    def ocuparSala(self, medico):
+        self.medico_id = medico.id
         self.status = "Ocupada"
-        # gerenciarSala(self.numero, medico, senha)
     
     def desocuparSala(self):
         self.status = "Desocupada"
