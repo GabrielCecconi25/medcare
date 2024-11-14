@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
 
 from Banco import Base
 
@@ -9,6 +10,8 @@ class Medico(Base):
     nome = Column(String)
     crm = Column(Integer, unique=True)
     especialidade = Column(String)
+
+    atendimento = relationship("Atendimento", back_populates="medico")
 
     def __repr__(self):
         return f'<Medico(nome={self.nome}, crm={self.crm}, especialidade={self.especialidade})>'

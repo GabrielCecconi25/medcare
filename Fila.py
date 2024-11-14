@@ -1,3 +1,7 @@
+from Banco import get_session
+from Paciente import Paciente
+from Senha import Senha
+
 class Fila():
     def __init__(self):
         self.__senhas = []
@@ -24,6 +28,16 @@ class Fila():
             raise FilaVazia('Fila do Atendimento vazia.')
         for i in self.__senhas:
             print(i)
+    
+    def criarSenha(self, paciente, session):
+        # Cria senha
+        senha = Senha(paciente, session)
+        session.commit()
+        return senha.numero
+            
+
+
+    
         
 class FilaVazia(Exception):
     pass

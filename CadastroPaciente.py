@@ -46,34 +46,35 @@ class CadastroSenha:
 
         else:
             paciente = session.query(Paciente).filter_by(cpf=cpf).first()
+            print(f"\nPaciente {paciente.nome} já cadastrado!")
 
-        if paciente:
-            # Exibe os dados do paciente
-            sleep(2)
-            print(f"Dados do paciente encontrado:")
-            print(f"Nome: {paciente.nome}")
-            print(f"CPF: {paciente.cpf}")
-            print(f"RG: {paciente.rg}")
-            print(f"Idade: {paciente.idade}")
+        # Exibe os dados do paciente
+        print(f"\nDados do paciente:")
+        print(f"Nome: {paciente.nome}")
+        print(f"CPF: {paciente.cpf}")
+        print(f"RG: {paciente.rg}")
+        print(f"Idade: {paciente.idade}")
 
-            # Perguntar se deseja gerar uma senha
-            gerar_senha = None
-            while gerar_senha != 'n' and gerar_senha != 's':
-                gerar_senha = input('Deseja gerar uma senha para o paciente? (s/n): ').strip().lower()
+        # Perguntar se deseja gerar uma senha
+        gerar_senha = None
+        while gerar_senha != 'n' and gerar_senha != 's':
+            gerar_senha = input('Deseja gerar uma senha para o paciente? (s/n): ').strip().lower()
 
-            if gerar_senha == 's':
-                # Criar uma nova senha para o paciente
-                senha = Senha(paciente, session)
-                
-                session.commit()
+        if gerar_senha == 's':
+            # Criar uma nova senha para o paciente
+            senha = Senha(paciente, session)
+            
+            session.commit()
 
-                print(f'Senha gerada para o Paciente {paciente.nome}: {senha.numero}')
-            else:
-                print(f"Senha não gerada para o Paciente {paciente.nome}.")
+            print(f'Senha gerada para o Paciente {paciente.nome}: {senha.numero}')
+            # Joga a senha na fila (ultimo) (Adicionar ao Banco), foi feito mas vamos verificar
+            fila = Fila()
+            fila.enfileira(senha.numero)
+        else:
+            print(f"Senha não gerada para o Paciente {paciente.nome}.")
+            
 
-        # Joga a senha na fila (ultimo) (Adicionar ao Banco), foi feito mas vamos verificar
-        fila = Fila()
-        fila.enfileira(senha.numero)
+        
 
         #Fecha conexão com o banco
         session.close()

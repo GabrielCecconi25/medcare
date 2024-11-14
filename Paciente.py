@@ -15,7 +15,9 @@ class Paciente(Base):
     convenio_id = Column(Integer, ForeignKey('convenio.id'))
 
     convenio = relationship("Convenio", back_populates="paciente")
-    senhas = relationship("Senha", back_populates="paciente")
+    
+    senha = relationship("Senha", back_populates="paciente")
+    atendimento = relationship("Atendimento", back_populates="paciente")
 
     def __repr__(self):
         return f'<Paciente(nome={self.nome}, cpf={self.cpf}, convenio={self.convenio.numero})>'

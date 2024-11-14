@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
 
 from Banco import Base
 
@@ -8,6 +9,8 @@ class Consultorio(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     numero = Column(Integer)
     status = Column(String)
+
+    atendimento = relationship("Atendimento", back_populates="consultorio")
 
     def __init__(self, numero, status="Desocupada"):
         self.numero = numero
