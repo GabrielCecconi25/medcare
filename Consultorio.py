@@ -22,26 +22,8 @@ class Consultorio(Base):
         self.numero = numero
         self.status = "Desocupado"
 
-    def ocuparSala(self, medico):
-        self.medico_id = medico.id
+    def ocuparSala(self):
         self.status = "Ocupada"
     
     def desocuparSala(self):
         self.status = "Desocupada"
-
-    def deletar_consultorio(self, id_consultorio, session=None):
-        #Deleta um consultório pelo ID.
-        consultorio = session.query(Consultorio).filter_by(id=id_consultorio).first()
-        if consultorio:
-            session.delete(consultorio)
-            session.commit()
-            print(f"Consultório com ID {id_consultorio} foi deletado.")
-        else:
-            print(f"Consultório com ID {id_consultorio} não encontrado.")
-
-    def listar_consultorios(self, session=None):
-        #Lista todos os consultórios na tabela.
-        consultorios = session.query(Consultorio).all()
-        for consultorio in consultorios:
-            print(consultorio)
-

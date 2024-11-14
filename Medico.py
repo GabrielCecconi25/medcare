@@ -22,18 +22,3 @@ class Medico(Base):
         self.nome = nome
         self.especialidade = especialidade
 
-    def deletar_medico(self, id_medico, session):
-        #Deleta um médico pelo ID.
-        medico = session.query(Medico).filter_by(id=id_medico).first()
-        if medico:
-            session.delete(medico)
-            session.commit()
-            print(f"Médico com ID {id_medico} foi deletado.")
-        else:
-            print(f"Médico com ID {id_medico} não encontrado.")
-
-    def listar_medicos(self, session):
-        #Lista todos os médicos na tabela.
-        medicos = session.query(Medico).all()
-        for medico in medicos:
-            print(medico)

@@ -24,7 +24,7 @@ def main():
         print("0. Sair")
         cod = int(input("Escolher opção inicial: "))
         if cod == 1: # Operações com Paciente
-            pac = int(input("1. Cadastrar Paciente\n2. Alterar Dados de Paciente\n3. Pegar Dados do Paciente\n4. Deletar Paciente\n"))
+            pac = int(input("1. Cadastrar Paciente\n2. Alterar Dados de Paciente\n3. Pegar Dados do Paciente\n4. Deletar Paciente\n5. Visualizar Pacientes\n"))
             engine, session = get_session()
 
             if pac == 1:
@@ -79,6 +79,15 @@ def main():
                     print("Paciente deletado com sucesso.")
                 else:
                     print("Paciente não encontrado.")
+
+            elif pac == 5:
+                pacientes = session.query(Paciente).all()
+                if pacientes:
+                    for paciente in pacientes:
+                        print(f"Paciente Nome: {paciente.nome}, CPF: {paciente.cpf}")
+                else:
+                    print("Sem pacientes cadastrados")
+
             session.close()
 
         elif cod == 2:  # Operações com Médico
@@ -215,13 +224,12 @@ def main():
             session.close()
 
         elif cod == 4:  # Operações com Consultório
-            cons = int(input("1. Cadastrar Consultório\n2. Alterar Dados do Consultório\n3. Pegar Dados do Consultório\n4. Deletar Consultório\n5. Ver consultorios\n"))
+            cons = int(input("1. Cadastrar Consultório\n2. Associar e Dessasociar Medico ao Consultorio\n3. Pegar Dados do Consultório\n4. Deletar Consultório\n5. Ver consultorios\n"))
             engine, session = get_session()
 
             if cons == 1:
                 numero = int(input("Informe o número do consultório: "))
-                consultorio_existente = session.query(
-                    Consultorio).filter_by(numero=numero).first()
+                consultorio_existente = session.query(Consultorio).filter_by(numero=numero).first()
                 if consultorio_existente:
                     print("Consultório já cadastrado.")
                 else:
@@ -231,15 +239,44 @@ def main():
                     print("Consultório cadastrado com sucesso.")
 
             elif cons == 2:
-                numero = int(input("Informe o número do consultório a ser atualizado: "))
-                consultorio = session.query(Consultorio).filter_by(numero=numero).first()
-                if consultorio:
-                    consultorio.status = input(
-                        "Informe status do consultório: ") or consultorio.status
-                    session.commit()
-                    print("Dados do consultório atualizados com sucesso.")
+                crm = int(input("Informe o CRM do médico a ser associado/desassociado: "))
+                medico = session.query(Medico).filter_by(crm=crm).first()
+                if medico:
+                    # Solicita a opção de associar ou desassociar
+                    print("Selecione a opção:\n")
+                    op = int(input("1. Associar Médico\n2. Desassociar Médico\n"))
+                    while op != 1 and op != 2:
+                        print("Opção Inválida.")
+                        op = int(input("1. Associar Médico\n2. Desassociar Médico\n"))
+                    
+                    # Solicita o número do consultório
+                    numero = int(input("Digite o número do consultório: "))
+                    consultorio = session.query(Consultorio).filter_by(numero=numero).first()
+                    
+                    if consultorio:
+                        if op == 1:
+                            # Verifica se já existe um médico associado ao consultório
+                            if consultorio.medico_id:
+                                print("Este consultório já possui um médico associado.")
+                            else:
+                                # Associa o médico ao consultório
+                                consultorio.medico_id = medico.id
+                                session.commit()
+                                print(f"Médico {medico.nome} foi associado ao consultório número {numero}.")
+                        
+                        elif op == 2:
+                            # Verifica se o consultório tem um médico associado e se é o mesmo médico
+                            if consultorio.medico_id == medico.id:
+                                # Desassocia o médico do consultório
+                                consultorio.medico_id = None
+                                session.commit()
+                                print(f"Médico {medico.nome} foi desassociado do consultório número {numero}.")
+                            else:
+                                print("Este médico não está associado a esse consultório.")
+                    else:
+                        print("Consultório não encontrado.")
                 else:
-                    print("Consultório não encontrado.")
+                    print("Médico não encontrado com o CRM fornecido.")
 
             elif cons == 3:
                 numero = int(input("Informe o número do consultório: "))

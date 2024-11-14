@@ -28,19 +28,4 @@ class Paciente(Base):
         self.rg = rg
         self.idade = idade
         self.convenio = convenio
-
-    def deletar_paciente(self, id_paciente, session=None):
-        # Deleta um paciente pelo ID.
-        paciente = session.query(Paciente).filter_by(id=id_paciente).first()
-        if paciente:
-            session.delete(paciente)
-            session.commit()
-            print(f"Paciente com ID {id_paciente} foi deletado.")
-        else:
-            print(f"Paciente com ID {id_paciente} não encontrado.")
-
-    def listar_pacientes(self, session=None):
-        # Lista todos os pacientes na tabela.
-        pacientes = session.query(Paciente).all()
-        for paciente in pacientes:
-            print(paciente)
+    
