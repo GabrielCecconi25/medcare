@@ -1,12 +1,12 @@
 from Banco import criar_banco, get_session
-import Atendimento
+from Atendimento import Atendimento
 from CadastroPaciente import CadastroSenha
 from Convenio import Convenio
 from Paciente import Paciente
 from Senha import Senha
 from Medico import Medico
 from Consultorio import Consultorio
-from Fila import Fila
+from Fila import Fila, FilaVazia
 
 
 def main():
@@ -129,7 +129,7 @@ def main():
             session.close()
 
         elif cod == 3:  # Fila de Atendimento
-            atd = int(input("1. Cadastrar Senha\n2. Gerar novo atendimento\n"))
+            atd = int(input("1. Cadastrar Senha\n2. Gerar novo atendimento\n3. Finalizar Atendimento\n"))
             engine, session = get_session()
 
             if atd == 1:
@@ -141,32 +141,59 @@ def main():
                     fila.enfileira(sen)
             
             elif atd == 2:
-                senha = fila.desenfileira()
-                paciente = senha.paciente
+                try:
+                    senha = fila.desenfileira()
+                    paciente = senha.paciente
 
+                    consultorio = session.query(Consultorio).filter_by(status="Desocupada").first()
+                    if consultorio:
+                        medico = session.query(Medico).filter_by(id=consultorio.medico_id).first()
+                        atendimento = Atendimento(paciente, medico, consultorio)
+
+                        session.add(atendimento)
+                        session.commit()                     
+                    else:
+                        print('Todos os consultorios estão ocupados no momento, aguarde mais um tempo!')
+                except FilaVazia as e:
+                    print(e)
+            
+            elif atd == 3:
+                crm = int(input('Informe o crm do Médico em Atendimento: '))
+                atendimento = session.query(Consultorio).filter_by(status="em andamento", crm=crm).first()
+
+                descricao = input("Informe uma descrição a consulta: ")
+                receita = input("Informe a receita/NA: ")
+
+                atendimento.encerrarAtendimento(descricao, receita)
             session.close()
 
         elif cod == 4:  # Operações com Consultório
-            cons = int(input("1. Cadastrar Consultório\n2. Alterar Dados do Consultório\n3. Pegar Dados do Consultório\n4. Deletar Consultório\n"))
+            cons = int(input("1. Cadastrar Consultório\n2. Alterar Dados do Consultório\n3. Pegar Dados do Consultório\n4. Deletar Consultório\n5. Ver consultorios"))
             engine, session = get_session()
 
             if cons == 1:
                 numero = int(input("Informe o número do consultório: "))
-                consultorio_existente = session.query(Consultorio).filter_by(numero=numero).first()
+                consultorio_existente = session.query(
+                    Consultorio).filter_by(numero=numero).first()
                 if consultorio_existente:
                     print("Consultório já cadastrado.")
                 else:
-                    localizacao = input("Informe a localização do consultório: ")
-                    consultorio = Consultorio(numero=numero, localizacao=localizacao)
+                    status = input(
+                        "Informe status do consultório: ")
+                    consultorio = Consultorio(
+                        numero=numero, status=status)
                     session.add(consultorio)
                     session.commit()
                     print("Consultório cadastrado com sucesso.")
 
             elif cons == 2:
-                numero = int(input("Informe o número do consultório a ser atualizado: "))
-                consultorio = session.query(Consultorio).filter_by(numero=numero).first()
+                numero = int(
+                    input("Informe o número do consultório a ser atualizado: "))
+                consultorio = session.query(
+                    Consultorio).filter_by(numero=numero).first()
                 if consultorio:
-                    consultorio.localizacao = input("Informe a nova localização do consultório: ") or consultorio.localizacao
+                    consultorio.localizacao = input(
+                        "Informe status do consultório: ") or consultorio.status
                     session.commit()
                     print("Dados do consultório atualizados com sucesso.")
                 else:
@@ -174,19 +201,27 @@ def main():
 
             elif cons == 3:
                 numero = int(input("Informe o número do consultório: "))
-                consultorio = session.query(Consultorio).filter_by(numero=numero).first()
+                consultorio = session.query(
+                    Consultorio).filter_by(numero=numero).first()
                 if consultorio:
-                    print(f"Número: {consultorio.numero}, Localização: {consultorio.localizacao}")
+                    print(f"Número: {consultorio.numero}, Localização: {
+                          consultorio.localizacao}")
                 else:
                     print("Consultório não encontrado.")
 
             elif cons == 4:
-                numero = int(input("Informe o número do consultório a ser deletado: "))
-                consultorio = session.query(Consultorio).filter_by(numero=numero).first()
+                numero = int(
+                    input("Informe o número do consultório a ser deletado: "))
+                consultorio = session.query(
+                    Consultorio).filter_by(numero=numero).first()
                 if consultorio:
                     session.delete(consultorio)
                     session.commit()
                     print("Consultório deletado com sucesso.")
+            elif cons == 5:
+                consultorios = session.query(Consultorio).all()
+                for consultorio in consultorios:
+                    print(consultorios)
                 else:
                     print("Consultório não encontrado.")
             session.close()
@@ -198,5 +233,4 @@ def main():
         else:
             print("Opção inválida, tente novamente.")
 
-            
 main()

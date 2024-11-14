@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 
@@ -11,6 +13,8 @@ class Atendimento(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     status = Column(String)
+    descricao = Column(String)
+    receita = Column(String)
     horario_inicio = Column(String)
     horario_termino = Column(String)
     paciente_id = Column(Integer, ForeignKey('paciente.id'))
@@ -27,6 +31,10 @@ class Atendimento(Base):
         self.paciente = paciente
         self.medico = medico
         self.consultorio = consultorio
+        self.horario_inicio = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
-    def encerrarAtendimento(self):
+    def encerrarAtendimento(self, descricao, receita):
+        self.descricao = descricao
+        self.receita = receita
+        self.horario_termino = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         self.status = "encerrado"
